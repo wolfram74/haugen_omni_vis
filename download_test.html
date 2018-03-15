@@ -27,6 +27,7 @@ function parse_blob(blob){
     console.log(chars.length)
     nums.forEach( (n, index ) => chars.push(String.fromCharCode(n)) )
     console.log(chars.length)
+    console.log(chars.split(0,10))
     stream.read().then(shout)
   }
   return chars
