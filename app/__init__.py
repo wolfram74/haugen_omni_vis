@@ -38,5 +38,5 @@ def data_base_query():
     }
     r = requests.post(endpoint, data=options)
     # print(r)
-    # print(r.text)
+    print(r.text)
     return r.text
