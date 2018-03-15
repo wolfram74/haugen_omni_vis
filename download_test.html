@@ -1,0 +1,46 @@
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+farts
+</body>
+<script type="text/javascript">
+
+// fetch(endpoint, options).then(parse_blob)
+let reading = false
+
+function parse_blob(blob){
+  console.log(blob)
+  console.log(blob.body)
+  var stream = blob.body.getReader()
+  reading = true
+  var loops = 0
+  var chars = []
+  stream.read().then(shout)
+  function shout(data){
+    if(data.done){
+      console.log('finished')
+      return
+    }
+    var nums = data.value
+    console.log(chars.length)
+    nums.forEach( (n, index ) => chars.push(String.fromCharCode(n)) )
+    console.log(chars.length)
+    stream.read().then(shout)
+  }
+  return chars
+}
+
+function parse_page(char_array){
+  var line_array= char_array.join('').split('\n')
+  console.log(char_array.length)
+  console.log(line_array.length)
+  console.log(line_array.slice(0, 10))
+}
+
+console.log('running')
+fetch('./data?year=2018&month=2&day=1', {data:{date:'4'}}).then(parse_blob).then(parse_page)
+
+</script>
+</html>
