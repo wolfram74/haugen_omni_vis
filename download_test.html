@@ -5,33 +5,8 @@
 <body>
 farts
 </body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script type="text/javascript">
-
-// fetch(endpoint, options).then(parse_blob)
-let reading = false
-
-function parse_blob(blob){
-  console.log(blob)
-  console.log(blob.body)
-  var stream = blob.body.getReader()
-  reading = true
-  var loops = 0
-  var chars = []
-  stream.read().then(shout)
-  function shout(data){
-    if(data.done){
-      console.log('finished')
-      return
-    }
-    var nums = data.value
-    console.log(chars.length)
-    nums.forEach( (n, index ) => chars.push(String.fromCharCode(n)) )
-    console.log(chars.length)
-    console.log(chars.slice(0, 10))
-    stream.read().then(shout)
-  }
-  return chars
-}
 
 async function extractStream(response){
   var stream = response.body.getReader()
@@ -39,10 +14,7 @@ async function extractStream(response){
   async function readStream(data){
     if(data.done){console.log('finished'); return}
     var nums = data.value
-    console.log(charsArray.length)
     nums.forEach( (n, index ) => charsArray.push(String.fromCharCode(n)) )
-    console.log(charsArray.length)
-    console.log(charsArray.slice(0, 10))
     await stream.read().then(readStream)
   }
   await stream.read().then(readStream)
@@ -51,13 +23,45 @@ async function extractStream(response){
 
 function parsePage(charArray){
   var lineArray= charArray.join('').split('\n')
-  console.log(charArray.length)
-  console.log(lineArray.length)
   console.log(lineArray.slice(0, 10))
+  var BVals = []
+  var timeVals = []
+  var dataVals = []
+  for(var lineNum = 0; lineNum<lineArray.length; lineNum++){
+    var line = lineArray[lineNum]
+    var lineElements = line.split(/[ ]+/)
+    if(lineElements[0]===String(Number(lineElements[0]))){
+      // console.log(lineElements)
+      BVals.push(lineElements[4])
+      timeVals.push(lineElements.slice(0,4))
+      dataVals.push({
+        BVals:lineElements[4],
+        timeVals:lineElements.slice(0,4)
+      })
+    }
+  }
+  console.log(BVals.length, BVals.slice(0,10))
+  console.log(timeVals.length, timeVals.slice(0,10))
+  var dataPoints = BVals.length
+  console.log(BVals.slice(dataPoints-10, dataPoints))
+  console.log(timeVals.slice(dataPoints-10, dataPoints))
+  return dataVals
 }
 
+function plotData(data){
+  console.log(data[0])
+}
+
+// var margin = {top: 20, right: 20, bottom: 30, left: 40}
+// var width = 960 - margin.left - margin.right
+// var height = 500 - margin.top - margin.bottom
+
+// var x = d3.scale.
+
 console.log('running')
-fetch('./data?year=2018&month=2&day=1').then(extractStream).then(parsePage)
+var queryResult = fetch('./data?year=2018&month=2&day=1').then(extractStream).then(parsePage)
+
+queryResult.then(plotData)
 
 </script>
 </html>
