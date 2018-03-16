@@ -33,15 +33,31 @@ function parse_blob(blob){
   return chars
 }
 
-function parse_page(char_array){
-  var line_array= char_array.join('').split('\n')
-  console.log(char_array.length)
-  console.log(line_array.length)
-  console.log(line_array.slice(0, 10))
+async function extractStream(response){
+  var stream = response.body.getReader()
+  var charsArray = []
+  async function readStream(data){
+    if(data.done){console.log('finished'); return}
+    var nums = data.value
+    console.log(charsArray.length)
+    nums.forEach( (n, index ) => charsArray.push(String.fromCharCode(n)) )
+    console.log(charsArray.length)
+    console.log(charsArray.slice(0, 10))
+    await stream.read().then(readStream)
+  }
+  await stream.read().then(readStream)
+  return charsArray
+}
+
+function parsePage(charArray){
+  var lineArray= charArray.join('').split('\n')
+  console.log(charArray.length)
+  console.log(lineArray.length)
+  console.log(lineArray.slice(0, 10))
 }
 
 console.log('running')
-fetch('./data?year=2018&month=2&day=1', {data:{date:'4'}}).then(parse_blob).then(parse_page)
+fetch('./data?year=2018&month=2&day=1').then(extractStream).then(parsePage)
 
 </script>
 </html>
