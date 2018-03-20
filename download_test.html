@@ -3,7 +3,8 @@
   <title></title>
 </head>
 <body>
-farts
+<div id='graph-container'>
+</div>
 </body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script type="text/javascript">
@@ -11,6 +12,7 @@ farts
 async function extractStream(response){
   var stream = response.body.getReader()
   var charsArray = []
+  console.log('stream retrieved', Date.now()/1000)
   async function readStream(data){
     if(data.done){console.log('finished'); return}
     var nums = data.value
@@ -35,8 +37,8 @@ function parsePage(charArray){
       BVals.push(lineElements[4])
       timeVals.push(lineElements.slice(0,4))
       dataVals.push({
-        BVals:lineElements[4],
-        timeVals:lineElements.slice(0,4)
+        BVal:lineElements[4],
+        timeVal:lineElements.slice(0,4)
       })
     }
   }
@@ -49,16 +51,40 @@ function parsePage(charArray){
 }
 
 function plotData(data){
-  console.log(data[0])
+  console.log(data[0], Date.now()/1000)
+  xScale.domain(data.map(function(d){
+    return d.timeVal[1]*1440+d.timeVal[2]*60+d.timeVal[3]*1
+  }))
+  yScale.domain(data.map(function(d) {
+    if(1*d.Bval>1000){return NaN}
+    return 1*d.Bval
+  }))
+  svg.select('circle .nodes')
+    .data(data)
+    .enter()
+    .append("svg:circle")
+    .attr("class", "nodes")
+    .attr('cx', (d)=>{return xScale(d.timeVal)})
+    .attr('cy', (d)=>{return yScale(d.Bval)})
+    .attr("r", "1px")
+    .attr("fill", "black")
 }
 
-// var margin = {top: 20, right: 20, bottom: 30, left: 40}
-// var width = 960 - margin.left - margin.right
-// var height = 500 - margin.top - margin.bottom
+var margin = {top: 20, right: 20, bottom: 30, left: 40}
+var width = 960 - margin.left - margin.right
+var height = 500 - margin.top - margin.bottom
 
-// var x = d3.scale.
+var xScale = d3.scaleLinear().range(0, width)
+var yScale = d3.scaleLinear().range(height, 0)
 
-console.log('running')
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+console.log('running', Date.now()/1000)
 var queryResult = fetch('./data?year=2018&month=2&day=1').then(extractStream).then(parsePage)
 
 queryResult.then(plotData)

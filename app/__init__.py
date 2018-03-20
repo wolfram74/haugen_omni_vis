@@ -1,5 +1,6 @@
 from flask import Flask, make_response, request
 import requests
+import time
 
 app = Flask(__name__, static_url_path='/')
 
@@ -13,8 +14,10 @@ def load():
 def data_return():
     print(request.args)
     print("%(year)s-%(month)s-%(day)s" % request.args)
-    print('oh snap')
-    print(type(data_base_query()))
+    print('oh snap at', time.time())
+    text_response = data_base_query()
+    print(type(text_response), 'at', time.time())
+    print(text_response[0:200])
     # return 'poot'
     return data_base_query()
 
