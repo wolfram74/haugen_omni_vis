@@ -25,7 +25,6 @@ async function extractStream(response){
 
 function parsePage(charArray){
   var lineArray= charArray.join('').split('\n')
-  console.log(lineArray.slice(0, 10))
   var BVals = []
   var timeVals = []
   var dataVals = []
@@ -42,30 +41,30 @@ function parsePage(charArray){
       })
     }
   }
-  console.log(BVals.length, BVals.slice(0,10))
-  console.log(timeVals.length, timeVals.slice(0,10))
   var dataPoints = BVals.length
-  console.log(BVals.slice(dataPoints-10, dataPoints))
-  console.log(timeVals.slice(dataPoints-10, dataPoints))
   return dataVals
 }
 
 function plotData(data){
   console.log(data[0], Date.now()/1000)
-  xScale.domain(data.map(function(d){
-    return d.timeVal[1]*1440+d.timeVal[2]*60+d.timeVal[3]*1
-  }))
-  yScale.domain(data.map(function(d) {
-    if(1*d.Bval>1000){return NaN}
-    return 1*d.Bval
-  }))
-  svg.select('circle .nodes')
+  console.log(data[0].BVal*1,data[0].BVal*1<1000)
+  var cleaned = data.filter((d)=>{return d.BVal*1 < 1000})
+  var peakB = d3.max(cleaned.map((d)=>{return d.BVal}))
+  console.log(peakB)
+  var twoDays = 2*1440
+  var start = data[0].timeVal[1]*1440+data[0].timeVal[2]*60+data[0].timeVal[3]*1
+  xScale.domain([start, start+twoDays])
+  yScale.domain([peakB*1.2, 0])
+  console.log(svg)
+  svg.selectAll('circle .nodes')
     .data(data)
     .enter()
     .append("svg:circle")
     .attr("class", "nodes")
-    .attr('cx', (d)=>{return xScale(d.timeVal)})
-    .attr('cy', (d)=>{return yScale(d.Bval)})
+    .attr('cx', (d)=>{return xScale(
+      d.timeVal[1]*1440+d.timeVal[2]*60+d.timeVal[3]*1
+      )})
+    .attr('cy', (d)=>{return yScale(d.BVal)})
     .attr("r", "1px")
     .attr("fill", "black")
 }
@@ -74,12 +73,12 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40}
 var width = 960 - margin.left - margin.right
 var height = 500 - margin.top - margin.bottom
 
-var xScale = d3.scaleLinear().range(0, width)
-var yScale = d3.scaleLinear().range(height, 0)
+var xScale = d3.scaleLinear().range([0, width])
+var yScale = d3.scaleLinear().range([height, 0])
 
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
+var svg = d3.select("#graph-container").append("svg")
+svg.attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
