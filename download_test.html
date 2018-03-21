@@ -18,6 +18,11 @@ function beginQuery(event){
   svgElement.querySelectorAll('circle').forEach(
     (ele)=>{svgElement.removeChild(ele)}
     )
+  svgElement.querySelectorAll('g').forEach(
+    (ele)=>{
+     if(ele.parentNode===svgElement){svgElement.removeChild(ele)}
+    }
+   )
   var dateElement = event.target.parentNode.querySelector('input[type="date"]')
   var dateArray = dateElement.value.split('-')
   var queryString = `year=${dateArray[0]}&month=${dateArray[1]}&day=${dateArray[2]}`
@@ -79,6 +84,9 @@ function plotData(data){
     .attr('cy', (d)=>{return yScale(d.BVal)})
     .attr("r", "1px")
     .attr("fill", "black");
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(xScale));
 }
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40};
@@ -90,7 +98,8 @@ var yScale = d3.scaleLinear().range([height, 0]);
 
 
 var svg = d3.select("#graph-container").append("svg")
-svg.attr("width", width + margin.left + margin.right)
+svg
+  .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
