@@ -4,16 +4,27 @@
 </head>
 <body>
 <form>
-  <input type='number' max=2018 min=1980>
-  <input type='number' max=1 min=12>
-  <input type='number' max=1 min=31>
-  <input type='date'>
+  <input type='date' value="2017-07-11"> <input type='button' value='produce plot'>
 </form>
 <div id='graph-container'>
 </div>
 </body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script type="text/javascript">
+
+function beginQuery(event){
+  event.preventDefault()
+  var svgElement = document.querySelector('svg')
+  svgElement.querySelectorAll('circle').forEach(
+    (ele)=>{svgElement.removeChild(ele)}
+    )
+  var dateElement = event.target.parentNode.querySelector('input[type="date"]')
+  var dateArray = dateElement.value.split('-')
+  var queryString = `year=${dateArray[0]}&month=${dateArray[1]}&day=${dateArray[2]}`
+  console.log(queryString)
+  var queryResult = fetch('./data?'+queryString).then(extractStream).then(parsePage)
+  queryResult.then(plotData)
+}
 
 async function extractStream(response){
   var stream = response.body.getReader()
@@ -38,7 +49,6 @@ function parsePage(charArray){
     var line = lineArray[lineNum]
     var lineElements = line.split(/[ ]+/)
     if(lineElements[0]===String(Number(lineElements[0]))){
-      // console.log(lineElements)
       BVals.push(lineElements[4])
       timeVals.push(lineElements.slice(0,4))
       dataVals.push({
@@ -47,21 +57,17 @@ function parsePage(charArray){
       })
     }
   }
-  var dataPoints = BVals.length
-  return dataVals
+  var dataPoints = BVals.length;
+  return dataVals;
 }
 
 function plotData(data){
-  console.log(data[0], Date.now()/1000)
-  console.log(data[0].BVal*1,data[0].BVal*1<1000)
-  var cleaned = data.filter((d)=>{return d.BVal*1 < 1000})
-  var peakB = d3.max(cleaned.map((d)=>{return d.BVal}))
-  console.log(peakB)
-  var twoDays = 2*1440
-  var start = data[0].timeVal[1]*1440+data[0].timeVal[2]*60+data[0].timeVal[3]*1
-  xScale.domain([start, start+twoDays])
-  yScale.domain([peakB*1.2, 0])
-  console.log(svg)
+  var cleaned = data.filter((d)=>{return d.BVal*1 < 1000});
+  var peakB = d3.max(cleaned.map((d)=>{return d.BVal}));
+  var twoDays = 2*1440;
+  var start = data[0].timeVal[1]*1440+data[0].timeVal[2]*60+data[0].timeVal[3]*1;
+  xScale.domain([start, start+twoDays]);
+  yScale.domain([peakB*1.2, 0]);
   svg.selectAll('circle .nodes')
     .data(data)
     .enter()
@@ -72,27 +78,28 @@ function plotData(data){
       )})
     .attr('cy', (d)=>{return yScale(d.BVal)})
     .attr("r", "1px")
-    .attr("fill", "black")
+    .attr("fill", "black");
 }
 
-var margin = {top: 20, right: 20, bottom: 30, left: 40}
-var width = 960 - margin.left - margin.right
-var height = 500 - margin.top - margin.bottom
+var margin = {top: 20, right: 20, bottom: 30, left: 40};
+var width = 960 - margin.left - margin.right;
+var height = 500 - margin.top - margin.bottom;
 
-var xScale = d3.scaleLinear().range([0, width])
-var yScale = d3.scaleLinear().range([height, 0])
+var xScale = d3.scaleLinear().range([0, width]);
+var yScale = d3.scaleLinear().range([height, 0]);
 
 
 var svg = d3.select("#graph-container").append("svg")
 svg.attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+  .attr("height", height + margin.top + margin.bottom)
   .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 console.log('running', Date.now()/1000)
-var queryResult = fetch('./data?year=2018&month=2&day=1').then(extractStream).then(parsePage)
+var submit = document.querySelector('input[type="button"]')
+var dateField = document.querySelector('input[type="date"]')
+submit.addEventListener('click', beginQuery)
 
-queryResult.then(plotData)
 
 </script>
 <style type="text/css">
