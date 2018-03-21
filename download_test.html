@@ -63,30 +63,40 @@ function parsePage(charArray){
     }
   }
   var dataPoints = BVals.length;
+  console.log(dataVals[0].BVal)
   return dataVals;
 }
 
 function plotData(data){
+  function timeScale(timeVal){return timeVal[1]*24+timeVal[2]*1+timeVal[3]/60}
   var cleaned = data.filter((d)=>{return d.BVal*1 < 1000});
   var peakB = d3.max(cleaned.map((d)=>{return d.BVal}));
-  var twoDays = 2*1440;
-  var start = data[0].timeVal[1]*1440+data[0].timeVal[2]*60+data[0].timeVal[3]*1;
-  xScale.domain([start, start+twoDays]);
-  yScale.domain([peakB*1.2, 0]);
+  var twoDays = 2*24;
+  var start = timeScale(data[0].timeVal);
+  xScale.domain([-twoDays, 0]);
+  yScale.domain([0, peakB*1.5]);
   svg.selectAll('circle .nodes')
     .data(data)
     .enter()
     .append("svg:circle")
     .attr("class", "nodes")
     .attr('cx', (d)=>{return xScale(
-      d.timeVal[1]*1440+d.timeVal[2]*60+d.timeVal[3]*1
+      timeScale(d.timeVal)-(start+twoDays)
       )})
     .attr('cy', (d)=>{return yScale(d.BVal)})
     .attr("r", "1px")
     .attr("fill", "black");
   svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(xScale));
+    .attr("transform", "translate(50," + height + ")")
+    .attr('class', 'xaxis')
+    .call(
+      d3.axisBottom(xScale)
+      .ticks(8)
+      );
+  svg.append('g')
+    .attr('class', 'yaxis')
+    .attr('transform', 'translate(50, 0)')
+    .call(d3.axisLeft(yScale))
 }
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40};
@@ -101,8 +111,8 @@ var svg = d3.select("#graph-container").append("svg")
 svg
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  // .append("g")
+  // .attr("transform", "translate(" + margin.left+1000 + "," + margin.top + ")");
 
 console.log('running', Date.now()/1000)
 var submit = document.querySelector('input[type="button"]')
