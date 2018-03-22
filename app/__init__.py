@@ -28,7 +28,7 @@ def data_return():
 
 def data_base_query(year,month,day):
     query_date = datetime.datetime(year=year,month=month,day=day)
-    back = datetime.timedelta(days=1)
+    back = datetime.timedelta(days=13)
     start_date = query_date-back
     print(datetime_object_to_str(start_date))
     print(datetime_object_to_str(query_date))
