@@ -73,6 +73,8 @@ function plotData(data){
   var peakB = d3.max(cleaned.map((d)=>{return d.BVal}));
   var twoDays = 2*24;
   var start = timeScale(data[0].timeVal);
+  console.log(start, timeScale(data[data.length-1].timeVal))
+  console.log(data.length)
   xScale.domain([-twoDays, 0]);
   yScale.domain([0, peakB*1.5]);
   svg.selectAll('circle .nodes')
@@ -86,16 +88,28 @@ function plotData(data){
     .attr('cy', (d)=>{return yScale(d.BVal)})
     .attr("r", "1px")
     .attr("fill", "black");
+  svg.append("text")
+    .attr("transform",
+      "translate(" + (width/2) + " ," +
+      (height + 30) + ")")
+    .style("text-anchor", "middle")
+    .text("Hour");
   svg.append("g")
-    .attr("transform", "translate(50," + height + ")")
+    .attr("transform", `translate(${0*margin.left},${height})`)
     .attr('class', 'xaxis')
     .call(
       d3.axisBottom(xScale)
       .ticks(8)
       );
+  svg.append("text")
+    .attr("transform","rotate(-90)")
+    .attr("y",20)
+    .attr("x",-height/2)
+    .style("text-anchor", "middle")
+    .text("Nanotesla");
   svg.append('g')
     .attr('class', 'yaxis')
-    .attr('transform', 'translate(50, 0)')
+    .attr('transform', `translate(${margin.left}, 0)`)
     .call(d3.axisLeft(yScale))
 }
 
@@ -103,7 +117,10 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40};
 var width = 960 - margin.left - margin.right;
 var height = 500 - margin.top - margin.bottom;
 
-var xScale = d3.scaleLinear().range([0, width]);
+var xScale = d3.scaleLinear().range([
+  margin.left,
+  width
+  ]);
 var yScale = d3.scaleLinear().range([height, 0]);
 
 
