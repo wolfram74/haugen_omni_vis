@@ -79,9 +79,12 @@ function parsePage(charArray){
     if(lineElements[0]===String(Number(lineElements[0]))){
       BVals.push(lineElements[4])
       timeVals.push(lineElements.slice(0,4))
+      var time = lineElements.slice(0,4)
+      time[1] = 1*time[1]+365*time[0]
+      if(time[0]%4===0){time[1]-=1}
       dataVals.push({
         BVal:lineElements[4],
-        timeVal:lineElements.slice(0,4)
+        timeVal:time
       })
     }
   }
@@ -103,6 +106,7 @@ function plotData(data){
   var meanAndSigma = sigmaCalc(cleaned)
   var twoDays = 2*24;
   var start = timeScale(plotting[0].timeVal);
+  console.log(plotting[0].timeVal, plotting[2000].timeVal)
   console.log(plotting.length, 1440*2-plotting.length)
   console.log(meanAndSigma)
   xScale.domain([-twoDays, 0]);
