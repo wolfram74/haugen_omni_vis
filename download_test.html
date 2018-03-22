@@ -39,9 +39,6 @@ function beginQuery(event){
   queryResult.then(plotData)
 };
 
-function somethingNeat(inputData){
-  return inputData**5
-}
 function sigmaCalc(data){
   var total = 0
   for(var ind=0; ind < data.length; ind++){
@@ -94,17 +91,18 @@ function parsePage(charArray){
 }
 
 function plotData(data){
-  function timeScale(timeVal){return timeVal[1]*24+timeVal[2]*1+timeVal[3]/60}
+  function timeScale(timeVal){
+    return (timeVal[1])*24+timeVal[2]*1+timeVal[3]/60
+  }
   var lastDay = data[data.length-1].timeVal[1]
   var cleaned = data.filter((d)=>{return d.BVal*1 < 1000});
-  var plotting = cleaned.filter((d)=>{return d.timeVal[1] >= lastDay-1});
+  var plotting = cleaned.filter((d)=>{
+    return (d.timeVal[1] >= lastDay-1)
+  });
   var peakB = d3.max(cleaned.map((d)=>{return d.BVal}));
   var meanAndSigma = sigmaCalc(cleaned)
   var twoDays = 2*24;
   var start = timeScale(plotting[0].timeVal);
-  console.log(start, timeScale(data[data.length-1].timeVal))
-  console.log(cleaned[0].timeVal, cleaned[cleaned.length-1].timeVal)
-  console.log(cleaned.length, 1440*14-cleaned.length)
   console.log(plotting.length, 1440*2-plotting.length)
   console.log(meanAndSigma)
   xScale.domain([-twoDays, 0]);
